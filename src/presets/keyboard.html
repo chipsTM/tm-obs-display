@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <style>
+        html, body {
+            margin: 0;
+            overflow: hidden;
+        }
+    </style>
+    <meta charset="UTF-8">
+    <title>Keyboard</title>
+    <script type="text/javascript" src="p5.min.js"></script>
+</head>
+
+<body>
+    <script>
+        let opFeed;
+        window.addEventListener("load", onLoad, false);
+
+        function setup() {
+            createCanvas(windowWidth, windowHeight);
+        }
+
+        function windowResized() {
+            resizeCanvas(windowWidth, windowHeight);
+        }
+
+        let padding = 20;
+        let defaultfillColor = "#00000099";
+        let fillColor = "#FF0000";
+        let lineThickness = 10;
+        let lineColor = "#FFFFFF";
+        let roundness = 10;
+
+        function draw() {
+            clear();
+
+            stroke(lineColor);
+
+            rectMode(CENTER);
+            strokeWeight(lineThickness);
+            // up
+            (opFeed && opFeed["InputGasPedal"] == 1) ? fill(fillColor) : fill(defaultfillColor);
+            rect(width/2, height/4, width/3 - padding, height/2 - padding, roundness);
+
+            // down
+            (opFeed && (opFeed["InputIsBraking"] == 1 || opFeed["InputBrakePedal"] == 1)) ? fill(fillColor) : fill(defaultfillColor);
+            rect(width/2, height*3/4, width/3 - padding, height/2 - padding, roundness);
+
+            // left default
+            let steerLeft = (opFeed && opFeed["InputSteer"] < 0) ? opFeed["InputSteer"] : 0;
+            fill(defaultfillColor);
+            strokeWeight(0);
+            rectMode(CENTER);
+            rect(width/6, height*3/4, width/3 - padding, height/2 - padding, roundness);
+            
+            // left fill
+            fill(fillColor);
+            strokeWeight(0);
+            rectMode(CORNER);
+            rect(width/3 - padding/2, height/2 + padding/2, steerLeft * (width/3 - padding), height/2 - padding, roundness);
+
+            // left outline
+            noFill();
+            strokeWeight(lineThickness);
+            rectMode(CENTER);
+            rect(width/6, height*3/4, width/3 - padding, height/2 - padding, roundness);
+
+            // right default
+            let steerRight = (opFeed && opFeed["InputSteer"] > 0) ? opFeed["InputSteer"] : 0;
+            fill(defaultfillColor);
+            strokeWeight(0);
+            rectMode(CENTER);
+            rect(width*5/6, height*3/4, width/3 - padding, height/2 - padding, roundness);
+            
+            // right fill
+            fill(fillColor);
+            strokeWeight(0);
+            rectMode(CORNER);
+            rect(width*2/3 + padding/2, height/2 + padding/2, steerRight * (width/3 - padding), height/2 - padding, roundness);
+
+            // right outline
+            noFill();
+            strokeWeight(lineThickness);
+            rectMode(CENTER);
+            rect(width*5/6, height*3/4, width/3 - padding, height/2 - padding, roundness);
+
+        }
+
+        function onLoad() {
+            // pass the variables you want from VehicleState
+            websocket = new WebSocket("ws://localhost:7775", "InputSteer|InputGasPedal|InputBrakePedal|InputIsBraking");
+
+            websocket.onopen = function (evt) { onOpen(evt) };
+            websocket.onclose = function (evt) { onClose(evt) };
+            websocket.onmessage = function (evt) { onMessage(evt) };
+            websocket.onerror = function (evt) { onError(evt) };
+        }
+
+        function onOpen(evt) {
+            console.log('WebSocket connection established.');
+        }
+
+        function onMessage(evt) {
+            opFeed = JSON.parse(evt.data);
+        }
+
+        function onClose(evt) {
+            console.log('WebSocket connection closed');
+            // we try every 5 seconds to reestablish websockets
+            setTimeout(onLoad, 5000);
+        }
+
+        function onError(evt) {
+            console.log('WebSocket error');
+            location.assign("404.html");
+        }
+    </script>
+</body>
+
+</html>

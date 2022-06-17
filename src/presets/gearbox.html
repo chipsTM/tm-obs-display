@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <style>
+        html, body {
+            margin: 0;
+            overflow: hidden;
+        }
+    </style>
+    <meta charset="UTF-8">
+    <title>Gearbox</title>
+    <script type="text/javascript" src="p5.min.js"></script>
+</head>
+
+<body>
+    <script>
+        let opFeed;
+        window.addEventListener("load", onLoad, false);
+
+        function setup() {
+            createCanvas(windowWidth, windowHeight);
+        }
+
+        function windowResized() {
+            resizeCanvas(windowWidth, windowHeight);
+        }
+
+        let padding = 20;
+        let defaultfillColor = "#00000099";
+        // let fillColor = "#FF0000";
+        let lineThickness = 10;
+        let lineColor = "#FFFFFF";
+        let roundness = 10;
+
+        function draw() {
+            clear();
+            
+            stroke(lineColor);
+
+            rectMode(CORNER);
+            strokeWeight(lineThickness);
+            fill(defaultfillColor);
+            // gearbox
+            rect(0 + padding, 0 + padding, width/6 - 2*padding, height - 2*padding, roundness);
+            fill(lineColor);
+            strokeWeight(0);
+            textAlign(CENTER, CENTER);
+            textSize(height / 2);
+            (opFeed) ? text(opFeed["CurGear"], width/12, height/2) : text(0, width/12, height/2);
+            
+            // rpm
+            fill(defaultfillColor);
+            strokeWeight(lineThickness);
+            rect(width/6 + padding, 0 + padding, width*5/6 - 2*padding, height - 2*padding, roundness);
+
+            let rpm = (opFeed) ? opFeed["RPM"] : 0;
+            colorMode(RGB);
+            let c = lerpColor(color(45, 136, 45), color(170, 57, 57), rpm/11000);
+            fill(c);
+            strokeWeight(0);
+            rect(width/6 + padding, 0 + padding, (width*5/6 - 2*padding) * rpm/11000, height - 2*padding, roundness);
+
+            noFill();
+            strokeWeight(lineThickness);
+            rect(width/6 + padding, 0 + padding, width*5/6 - 2*padding, height - 2*padding, roundness);
+
+        }
+
+        function onLoad() {
+            // pass the variables you want from VehicleState
+            websocket = new WebSocket("ws://localhost:7775", "CurGear|RPM");
+
+            websocket.onopen = function (evt) { onOpen(evt) };
+            websocket.onclose = function (evt) { onClose(evt) };
+            websocket.onmessage = function (evt) { onMessage(evt) };
+            websocket.onerror = function (evt) { onError(evt) };
+        }
+
+        function onOpen(evt) {
+            console.log('WebSocket connection established.');
+        }
+
+        function onMessage(evt) {
+            opFeed = JSON.parse(evt.data);
+        }
+
+        function onClose(evt) {
+            console.log('WebSocket connection closed');
+            // we try every 5 seconds to reestablish websockets
+            setTimeout(onLoad, 5000);
+        }
+
+        function onError(evt) {
+            console.log('WebSocket error');
+            location.assign("404.html");
+        }
+    </script>
+</body>
+
+</html>
