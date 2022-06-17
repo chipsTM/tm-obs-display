@@ -6,8 +6,9 @@
 
 ---
 
-## Installation Instructions
+## Setup Instructions
 - Add OBS Browser source and select the "Local File" option (url option may be available in future)
+	- There have been some presets made available under the `OpenplanetNext\OBSDisplay\presets` folder
 - Adjust width/height as you see fit
 - Ensure both "Shutdown source when not visible" and "Refresh browser when scene becomes active" are checked
     - If the dashboard is not working as intended showing/hiding the browser source with these options enabled should fix
@@ -22,9 +23,6 @@ Currently only the data is from VehicleState. Additional data can be made availa
 - better Presets (keyboard, pad, gearbox, speed, etc.) 
 - customization window
 - native HTTP Server
-
-
-
 
 ## Changelog
 
