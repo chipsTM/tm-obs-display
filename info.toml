@@ -1,8 +1,8 @@
 [meta]
 name     = "OBS Display"
-author   = "Chips"
+author   = "chips"
 category = "Overlay"
-version  = "0.1.0"
+version  = "0.2.0"
 
 [script]
-dependencies = [ "VehicleState" ]
+dependencies = [ "VehicleState", "WebSockets" ]

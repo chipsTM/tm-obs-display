@@ -14,23 +14,20 @@ void Update(float dt) {
             // it is easier for extensibility at the client side
             // what was asked for is retrived and sent over websockets
             array<string> featuresForJSON;
-            for (uint j = 0; j < wsc.Features.Length; j++) {
-                featuresForJSON.InsertLast(VisStateFormatter(visState, wsc.Features[j]));
+            array<string> features = wsc.Protocol.Split("|");
+            for (uint j = 0; j < features.Length; j++) {
+                featuresForJSON.InsertLast(VisStateFormatter(visState, features[j]));
             }
-            wsc.SendData("{" + string::Join(featuresForJSON, ",") + "}");
-        } 
+            wsc.SendMessage("{" + string::Join(featuresForJSON, ",") + "}");
+        }
     }
 #endif
 }
 
-void CopyPresets(const string &in dirLocation) {
-    if (!IO::FolderExists(dirLocation)) {
-        trace("OBSDisplay folder doesn't exist. Creating...");
-        IO::CreateFolder(dirLocation);
-    }
-    if (!IO::FolderExists(dirLocation + "/presets")) {
+void CopyPresets() {
+    if (!IO::FolderExists(IO::FromStorageFolder("/presets"))) {
         trace("OBSDisplay/presets folder doesn't exist. Creating...");
-        IO::CreateFolder(dirLocation + "/presets");
+        IO::CreateFolder(IO::FromStorageFolder("/presets"));
     }
     array<string> filesToCopy = {
         "keyboard.html",
@@ -43,7 +40,7 @@ void CopyPresets(const string &in dirLocation) {
     for (uint i = 0; i < filesToCopy.Length; i++) {
         IO::FileSource presetFile("src/presets/" + filesToCopy[i]);
         auto content = presetFile.Read(presetFile.Size());
-        IO::File copiedFile(dirLocation + "/presets/" + filesToCopy[i]);
+        IO::File copiedFile(IO::FromStorageFolder("/presets/") + filesToCopy[i]);
         copiedFile.Open(IO::FileMode::Write);
         copiedFile.Write(content);
         copiedFile.Close();
@@ -51,29 +48,21 @@ void CopyPresets(const string &in dirLocation) {
 }
 
 
-WebSockets@ websocket;
-HTTPServer@ display;
-string dirLocation = IO::FromDataFolder("OBSDisplay");
+Net::WebSocket@ websocket;
 
 void Main() {
 #if TMNEXT
-    // Only copy if folder doesn't exist
-    if (!IO::FolderExists(dirLocation)) {
-        CopyPresets(dirLocation);
+    // Only copy presets if folder doesn't exist
+    if (!IO::FolderExists(IO::FromStorageFolder("/presets"))) {
+        CopyPresets();
     }
 
-    // Leaving out for first release, seems like there are some hang ups
-    // issues to resolve in future if people actually need a http server
-    // otherwise serving a local page works just fine
-
-    // we need a display server first to serve webpages
-    // @display = HTTPServer("localhost", 7774);
-    // display.Serve(dirLocation);
-
-
     // create new websocket and start connection
-    @websocket = WebSockets("localhost", 7775);
-    websocket.Listen();
+    @websocket = Net::WebSocket();
+    if (!websocket.Listen(OBS_Display_Address, OBS_Display_Port)) {
+        trace("unable to start websockets server");
+        return;
+    }
 
 #endif
 }

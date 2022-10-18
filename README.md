@@ -8,7 +8,7 @@
 
 ## Setup Instructions
 - Add OBS Browser source and select the "Local File" option (url option may be available in future)
-	- There have been some presets made available under the `OpenplanetNext\OBSDisplay\presets` folder
+	- There have been some presets made available under the `OpenplanetNext\PluginStorage\OBSDisplay\presets` folder
 - Adjust width/height as you see fit
 - Ensure both "Shutdown source when not visible" and "Refresh browser when scene becomes active" are checked
     - If the dashboard is not working as intended showing/hiding the browser source with these options enabled should fix
