@@ -4,5 +4,7 @@ author   = "chips"
 category = "Overlay"
 version  = "0.2.0"
 
+siteid = 211
+
 [script]
 dependencies = [ "VehicleState", "WebSockets" ]
